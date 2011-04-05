@@ -1,0 +1,36 @@
+body {
+    background-image: -moz-linear-gradient(left bottom , transparent, transparent, transparent, transparent, transparent 95%, #EFEFEF 100%);
+    background-size: 20px 20px;
+    background-image: 
+    		-webkit-gradient(linear, 100% 0%, 0% 100%,
+			color-stop(0, transparent),
+			color-stop(0, transparent),
+			color-stop(0, transparent),
+			color-stop(95%, transparent),
+			color-stop(100%, #EFEFEF));
+    overflow:hidden;
+}
+
+
+#logo-content{
+    left: 24%;
+    position: absolute;
+    top: 30%;
+}
+
+#tedx-logo{
+    color: #F20E0E;
+    font-family: "ff-din-web-1","ff-din-web-2",Arial,Verdana,sans-serif;
+    font-size: 8em;
+    font-weight: bold;
+}
+
+#location{
+    color:#000;
+}
+
+#face_content img{
+    -moz-border-radius:30px;
+    -webkit-border-radius:30px;
+    border-radius:30px;
+    }

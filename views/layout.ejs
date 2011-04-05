@@ -3,11 +3,22 @@
 <html>
 <head>
     <title>Page Title</title>
+    <link rel="stylesheet" href="style.css"></link>
 </head>
 
 <body>
 
+
 <%- body %>
 
+
+<script>
+var attend = [<% for(i = 0; i < attendings.data.length; i ++) { %> {name: "<%= attendings.data[i].name %>", id:"<%= attendings.data[i].id %>" }, <% } %>];
+</script>
+
+<script src="http://therestudio.com/media/js/protoclass.js"></script>
+<script src="http://cachedcommons.org/cache/box2d/1.0.0/javascripts/box2d-min.js"></script>
+
+<script src="tedx.js"></script>
 </body>
 </html>
