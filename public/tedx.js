@@ -12,8 +12,39 @@ var isMouseDown = false;
 var createMode = false;
 var mouseJoint;
 var k=0;
-var theme = [ "#000000", "#FFFFFF", "#2D2B2A", "#B81111", "#FFFFFF" ]
-init();
+var theme = [ "#000000", "#2D2B2A", "#B81111" ];
+var html = "";
+var displayedTweet = false;
+var logo;
+$(function(){
+   var socket = new io.Socket(null, {port: 3000, rememberTransport: false});
+   socket.connect();
+   var selected_user = 
+   init();
+   logo = $("#logo-content");
+   for(i=0; i<10; i++){ 
+   var rand_user = Math.floor(Math.random() * users.length+1);
+   var selected_user = users[rand_user];
+   var x = Math.random() * stage[2];
+   var y = Math.random() * -200
+   faceBall(selected_user.name, selected_user.id, "facebook", x, y);
+   }
+   var live_tweet = $("#live-tweet");
+   socket.on('message', function(json){
+   data = JSON.parse(json);
+   faceBall(data.user.name, data.user.profile_image_url, "twitter");
+   if(!displayedTweet)
+   {    
+        live_tweet.html(autoLink(data.text));
+        live_tweet.fadeIn(3000, function(){ displayedTweet = true; });
+   } else{
+        live_tweet.fadeOut(3000, function(){ live_tweet.html(autoLink(data.text)); });
+        live_tweet.fadeIn(3000);
+   }
+
+   });
+   
+});
 
 /* ########## init box2d and create world #############*/
 function init(){
@@ -29,19 +60,14 @@ function init(){
 	worldAABB.maxVertex.Set( screen.width + 200, screen.height + 200 );
 	world = new b2World( worldAABB, new b2Vec2( 0, 0 ), true );
         walls();
-        tweetBall();
         setInterval(loop,1000/40);
 }
 
 /* ########## Create new Ball ########## */
 
-function tweetBall(mouseX, mouseY){
+function faceBall(name, id, type, mouseX, mouseY){
     
     size = Math.floor(Math.random() * (80 - 60 + 1) + 60);
-    // generate random values for x,y (position of a ball)
-    var x = Math.random() * (window.innerWidth - logo.offsetLeft);
-    var y = Math.random() * (window.innerHeight - logo.offsetTop);
-    
     
     // create a canvas element
     var element = document.createElement("div");
@@ -64,7 +90,12 @@ function tweetBall(mouseX, mouseY){
     
     var content = document.createElement("div");
         content.id = "face_content";
-        content.innerHTML = "<img src='http://graph.facebook.com/AnissBouraba/picture?type=square'/>";
+        if(type == "facebook") {
+        html = '<a href="http://www.facebook.com/profile.php?id='+id+'" target="_blank" title="'+name+'" alt="'+name+'"><img src="http://graph.facebook.com/'+id+'/picture?type=square"/></a>';
+        } else{
+            html = '<a href="http://twitter.com/'+name+'" title="'+name+'" target="_blank" alt="'+name+'"><img width="48" height="48" src="'+id+'"/></a>';
+        }
+        content.innerHTML = html;
         content.style.position = "absolute";
         content.style.width = (50 - 20*2) + 'px';
         content.style.left = (((size - 50) / 2)) +'px';
@@ -87,14 +118,21 @@ function tweetBall(mouseX, mouseY){
     var b2body = new b2BodyDef();
 	b2body.AddShape(circle);
 	b2body.userData = {element: element};
-	b2body.position.Set( mouseX, mouseY);
-	b2body.linearVelocity.Set( Math.random() * 400 - 200, Math.random() * 400 - 200 );
-	bodies.push( world.CreateBody(b2body) );
+        
+        switch(type){
+            case "twitter":
+                    b2body.position.Set( Math.random() * stage[2], Math.random() * -200 );
+                    b2body.linearVelocity.Set( Math.random() * 400 - 200, Math.random() * 400 - 200 );
+            break;
+            case "facebook":
+                    b2body.position.Set( mouseX, mouseY);
+                    b2body.linearVelocity.Set( Math.random() * 400 - 200, Math.random() * 400 - 200 );
+            break;
+        }
+	
+        bodies.push( world.CreateBody(b2body) );
     
 }
-
-/* ########## face Ball ####### */
-
 
 /* ########### Loop for animation ############ */
 
@@ -140,11 +178,10 @@ function loop(){
 function walls(){
 	bottom_wall = createBox(world, stage[2] / 2, - wall_thickness, stage[2], wall_thickness);
 	top_wall = createBox(world, stage[2] / 2, stage[3] + wall_thickness, stage[2], wall_thickness);
-	left_wall = createBox(world,  - wall_thickness, 0, wall_thickness, stage[3] - wall_thickness);
+	left_wall = createBox(world, - wall_thickness, stage[3] / 2, wall_thickness, stage[3]);
 	right_wall = createBox(world, stage[2] + wall_thickness, stage[3] / 2, wall_thickness, stage[3]);
     
-    logo = document.getElementById("logo-content");
-    logo_wall = createBox(world, (stage[2] / 2) - 20, (stage[3] / 2), 300, 90);
+    logo_wall = createBox(world, (stage[2] / 2) + 5, (stage[3] / 2), 330, 120);
 }
 
 
@@ -191,9 +228,10 @@ function onDocumentMouseUp() {
 }
 
 function onDocumentMouseMove( event ) {
-
+        
 	mouseX = event.clientX;
 	mouseY = event.clientY;
+        return false;
 }
 
 function onDocumentDoubleClick() {
@@ -205,8 +243,9 @@ function mouseDrag()
 {
 	// mouse press
 	if (createMode) {
-
-		tweetBall( mouseX, mouseY );
+                 rand_user = Math.floor(Math.random() * users.length+1);
+                 selected_user = users[rand_user];
+		faceBall(selected_user.name, selected_user.id, "facebook", mouseX, mouseY );
 
 	} else if (isMouseDown && !mouseJoint) {
 
@@ -287,4 +326,32 @@ function getBodyAtMouse() {
 
 	return body;
 
+}
+
+function autoLink(what) {
+	str = what; out = ""; url = ""; i = 0;
+	do {
+		url = str.match(/(((ht|f)tps?:\/\/)?([a-z\-]+\.)*[\-\w]+(\.[a-z]{2,4})+(\/[\w\_\-\?\=\&\.]*)*(?![a-z]))/i);
+		if(url!=null) {
+			// get href value
+			href = url[0];
+			if(href.substr(0,7)!="http://") href = "http://"+href;
+		
+			// where the match occured
+			where = str.indexOf(url[0]);
+		
+			// add it to the output
+			out += str.substr(0,where);
+		
+			// link it
+			out += '<a href="'+href+'" target="_blank">'+url[0]+'</a>';
+		
+			// prepare str for next round
+			str = str.substr((where+url[0].length));
+		} else {
+			out += str;
+			str = "";
+		}
+	} while(str.length>0);
+	return out.replace(/\B@([_a-z0-9]+)/ig,'<a href="http://twitter.com/$1" target="_blank">@$1</a>');
 }

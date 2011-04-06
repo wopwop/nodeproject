@@ -12,13 +12,18 @@
 <%- body %>
 
 
+
 <script>
-var attend = [<% for(i = 0; i < attendings.data.length; i ++) { %> {name: "<%= attendings.data[i].name %>", id:"<%= attendings.data[i].id %>" }, <% } %>];
+var users = [<% for(i = 0; i < attendings.data.length; i ++) { %> {name: "<%= attendings.data[i].name %>", id:"<%= attendings.data[i].id %>" }, <% } %>];
 </script>
 
-<script src="http://therestudio.com/media/js/protoclass.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="http://cachedcommons.org/cache/jquery/1.4.2/javascripts/jquery-min.js"></script>
+<script src="protoclass.js"></script>
 <script src="http://cachedcommons.org/cache/box2d/1.0.0/javascripts/box2d-min.js"></script>
-
 <script src="tedx.js"></script>
+
+
+
 </body>
 </html>
