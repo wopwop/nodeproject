@@ -31,7 +31,7 @@ app.listen(3000);
 
 var socket = io.listen(app);
 
-var config = {user: "_niss", password: "102030", track: ["Algiers","TEDx","Alger", "Algérie", "Algeria", "entrepreneur", "entrepreneurship"]};
+var config = {user: "_niss", password: "", track: ["Algiers","TEDx","Alger", "Algérie", "Algeria", "entrepreneur", "entrepreneurship"]};
 var twitter = new (require("twitter-node").TwitterNode)(config);
 twitter.addListener("tweet", function(tweet){socket.broadcast(JSON.stringify(tweet));});
 twitter.stream();
